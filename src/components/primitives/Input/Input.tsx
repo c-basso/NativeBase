@@ -6,7 +6,7 @@ import { useFormControl } from '../../composites/FormControl';
 import { useHover } from '@react-native-aria/interactions';
 import { extractInObject, stylingProps } from '../../../theme/tools/utils';
 import { usePropsResolution } from '../../../hooks/useThemeProps';
-import { mergeRefs, resolveStackStyleInput } from '../../../utils';
+import { resolveStackStyleInput } from '../../../utils';
 import { Stack } from '../Stack';
 import { makeStyledComponent } from '../../../utils/styled';
 import { useResolvedFontFamily } from '../../../hooks/useResolvedFontFamily';
@@ -35,8 +35,17 @@ const Input = (
   });
   const [isFocused, setIsFocused] = React.useState(false);
   const handleFocus = (focusState: boolean, callback: any) => {
-    setIsFocused(focusState);
-    callback();
+    // Defer state update so re-render doesn't run in same tick as native focus.
+    // Otherwise on some RN versions the input loses focus immediately.
+    const run = () => {
+      setIsFocused(focusState);
+      callback();
+    };
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 0);
+    }
   };
 
   const _ref = React.useRef(null);
@@ -83,6 +92,25 @@ const Input = (
       isReadOnly: inputThemeProps.isReadOnly,
     }
   );
+
+  // Stable ref callbacks so React doesn't call ref(null) + ref(el) on every
+  // re-render (e.g. when isFocused changes), which can make the input lose focus.
+  const refsRef = React.useRef([ref, _ref, wrapperRef]);
+  refsRef.current = [ref, _ref, wrapperRef];
+  const setInputRef = React.useCallback((value: any) => {
+    refsRef.current.forEach((r) => {
+      if (typeof r === 'function') r(value);
+      else if (r != null) (r as React.MutableRefObject<any>).current = value;
+    });
+  }, []);
+  const stackRefsRef = React.useRef([_ref, wrapperRef]);
+  stackRefsRef.current = [_ref, wrapperRef];
+  const setStackRef = React.useCallback((value: any) => {
+    stackRefsRef.current.forEach((r) => {
+      if (typeof r === 'function') r(value);
+      else if (r != null) (r as React.MutableRefObject<any>).current = value;
+    });
+  }, []);
 
   const [layoutProps, nonLayoutProps] = extractInObject(resolvedProps, [
     ...stylingProps.margin,
@@ -148,7 +176,7 @@ const Input = (
     <Stack
       {..._stack}
       {...layoutProps}
-      ref={mergeRefs([_ref, wrapperRef])}
+      ref={setStackRef}
       isFocused={isFocused}
     >
       {InputLeftElement || leftElement ? InputLeftElement || leftElement : null}
@@ -175,7 +203,7 @@ const Input = (
           handleFocus(false, onBlur ? () => onBlur(e) : () => {});
         }}
         {..._input}
-        ref={mergeRefs([ref, _ref, wrapperRef])}
+        ref={setInputRef}
       />
       {InputRightElement || rightElement
         ? InputRightElement || rightElement
