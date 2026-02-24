@@ -3,7 +3,6 @@ import type { IInputProps } from './types';
 import { TextInput } from 'react-native';
 import { useToken } from '../../../hooks';
 import { useFormControl } from '../../composites/FormControl';
-import { useHasResponsiveProps } from '../../../hooks/useHasResponsiveProps';
 import { useHover } from '@react-native-aria/interactions';
 import { extractInObject, stylingProps } from '../../../theme/tools/utils';
 import { usePropsResolution } from '../../../hooks/useThemeProps';
@@ -119,10 +118,15 @@ const Input = (
     'colors',
     resolvedProps.invalidOutlineColor
   );
-  //TODO: refactor for responsive prop
-  if (useHasResponsiveProps(props)) {
-    return null;
-  }
+  // NOTE: NativeBase upstream returns null when responsive props are passed
+  // to primitive inputs. On newer React Native versions this can cause the
+  // input to unmount on state changes (e.g. focus), which looks like the
+  // field immediately losing focus. We intentionally keep rendering even
+  // when responsive props are present to avoid that focus-loss behaviour.
+  // const hasResponsiveProps = useHasResponsiveProps(props);
+  // if (hasResponsiveProps) {
+  //   return null;
+  // }
 
   if (resolvedProps.focusOutlineColor && isFocused) {
     layoutProps.borderColor = resolvedProps.focusOutlineColor;
