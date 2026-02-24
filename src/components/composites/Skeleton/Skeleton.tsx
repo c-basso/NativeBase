@@ -7,6 +7,8 @@ import type { ISkeletonProps } from './types';
 import { useHasResponsiveProps } from '../../../hooks/useHasResponsiveProps';
 import { useToken } from '../../../hooks/useToken';
 
+const AnimatedView: any = Animated.View;
+
 const Skeleton = (props: ISkeletonProps, ref: any) => {
   const isDomUsable = canUseDom();
   const {
@@ -59,7 +61,7 @@ const Skeleton = (props: ISkeletonProps, ref: any) => {
     children
   ) : (
     <Box bg={endColor} {...resolvedProps} ref={ref}>
-      <Animated.View style={skeletonStyle.skeleton} />
+      <AnimatedView style={skeletonStyle.skeleton} />
     </Box>
   );
 };

@@ -2,7 +2,8 @@ import type {
   GetResponsiveStylesParams,
   GetResponsiveStylesReturnType,
 } from './types';
-import { Dimensions, ScaledSize, StyleSheet } from 'react-native';
+import type { ScaledSize } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import React from 'react';
 
 export const getResponsiveStylesImpl = (width: number) => (
@@ -72,14 +73,22 @@ export const useDimensionsWithEnable = ({ enable }: { enable?: boolean }) => {
           setDimensions(window);
         }
       }
-      Dimensions.addEventListener('change', handleChange);
+      const subscription: any = Dimensions.addEventListener(
+        'change',
+        handleChange
+      );
       // We might have missed an update between calling `get` in render and
       // `addEventListener` in this handler, so we set it here. If there was
       // no change, React will filter out this update as a no-op.
       handleChange({ window: Dimensions.get('window') });
 
       return () => {
-        Dimensions.removeEventListener('change', handleChange);
+        // React Native >= 0.65 (including 0.84) returns a subscription
+        // object with a remove method. We target that API and drop the
+        // legacy removeEventListener path.
+        if (subscription && typeof subscription.remove === 'function') {
+          subscription.remove();
+        }
       };
     }
     return () => {};

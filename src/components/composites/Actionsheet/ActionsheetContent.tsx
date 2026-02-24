@@ -8,6 +8,8 @@ import Box from '../../primitives/Box';
 import { ActionSheetContext } from './ActionSheetContext';
 import { useHasResponsiveProps } from '../../../hooks/useHasResponsiveProps';
 
+const AnimatedView: any = Animated.View;
+
 const Content = memo(
   forwardRef(
     (
@@ -132,12 +134,12 @@ const ActionsheetContent = (
   }
 
   return (
-    <Animated.View
+    <AnimatedView
       style={{
         transform: [{ translateY: pan.y }],
         width: '100%',
       }}
-      onLayout={(event) => {
+      onLayout={(event: any) => {
         const { height } = event.nativeEvent.layout;
         sheetHeight.current = height;
       }}
@@ -152,7 +154,7 @@ const ActionsheetContent = (
         ref={ref}
         {...props}
       />
-    </Animated.View>
+    </AnimatedView>
   );
 };
 

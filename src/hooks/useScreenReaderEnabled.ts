@@ -18,7 +18,7 @@ export function useScreenReaderEnabled() {
       handleSetEnabled(res);
     }
 
-    let handler: any = AccessibilityInfo.addEventListener(
+    const subscription: any = AccessibilityInfo.addEventListener(
       'screenReaderChanged',
       (event: any) => {
         handleSetEnabled(event);
@@ -28,7 +28,12 @@ export function useScreenReaderEnabled() {
     setInitialValue();
     return () => {
       mountedRef.current = false;
-      AccessibilityInfo.removeEventListener('screenReaderChanged', handler);
+      // React Native >= 0.65 (including 0.84) returns a subscription
+      // object with a remove method. We target that API and drop the
+      // legacy removeEventListener path.
+      if (subscription && typeof subscription.remove === 'function') {
+        subscription.remove();
+      }
     };
   });
 

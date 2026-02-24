@@ -80,7 +80,7 @@ export const Transition = forwardRef(
   ) => {
     const animateValue = React.useRef(new Animated.Value(0)).current;
 
-    const Component = React.useMemo(() => {
+    const Component: any = React.useMemo(() => {
       if (as) {
         return Animated.createAnimatedComponent(as);
       }

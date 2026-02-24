@@ -6,6 +6,8 @@ import type { ISlideFadeProps } from './types';
 import { canUseDom } from '../../../utils';
 import { useHasResponsiveProps } from '../../../hooks/useHasResponsiveProps';
 
+const AnimatedView: any = Animated.View;
+
 const SlideFade = ({ children, ...props }: ISlideFadeProps, ref?: any) => {
   const isDomUsable = canUseDom();
 
@@ -64,7 +66,7 @@ const SlideFade = ({ children, ...props }: ISlideFadeProps, ref?: any) => {
   }
 
   return (
-    <Animated.View
+    <AnimatedView
       style={[
         {
           opacity: fadeAnim,
@@ -74,7 +76,7 @@ const SlideFade = ({ children, ...props }: ISlideFadeProps, ref?: any) => {
       ref={ref}
     >
       <Box {...props}>{children}</Box>
-    </Animated.View>
+    </AnimatedView>
   );
 };
 
